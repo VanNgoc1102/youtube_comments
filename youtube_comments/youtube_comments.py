@@ -36,7 +36,7 @@ while True:
 
 print(comments)
 
-with open('new_comments.json','w',encoding='utf-8') as f:
+with open('comments.json','w',encoding='utf-8') as f:
     json.dump(comments,f,indent=4)
 print("Count CommentsThreads:",len(comments),"comments")
 
