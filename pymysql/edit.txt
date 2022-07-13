@@ -1,0 +1,158 @@
+mySql_Create_Table_Query ='''CREATE TABLE comment_yt(
+                        Kinnds longtext,
+                        Etags longtext,
+                        id longtext,
+                        author longtext,
+                        authorChannelUrl longtext,
+                        content longtext,
+                        published_at longtext)'''
+                    
+
+cursor.execute("DROP TABLE IF EXISTS comment_yt")
+conn = pymysql.connect(host='localhost',user='root',password='110202',db='')
+cursor=conn.cursor()
+
+query = "CREATE DATABASE comments"
+cursor.execute(query)
+
+json_data=open("yt_comments.json").read()
+json_obj=json.loads(json_data)
+# close connection
+
+
+for item in json_obj:
+    Kinds=item.get('Kinds')
+    Etags=item.get('Etags')
+    id=item.get('id')
+    author=item.get('author')
+    authorChannelUrl=item.get('authorChannelUrl')
+    content=item.get('content')
+    published_at=item.get('published_at')
+
+'''
+
+'''
+import json
+import requests
+#VIDEO_ID=input("Enter ID: ")
+URL="https://www.googleapis.com/youtube/v3/commentThreads"
+API_KEY="AIzaSyBZnBVHK5L57k4cwbEVPN7GXMKHOlmnW3U"
+
+VIDEO_ID="tlcWiP7OLFI&list=PLhBgTdAWkxeCL3bUv6NLGrg2248ryIUAD"
+response=requests.get(f"{URL}?key={API_KEY}&videoId={VIDEO_ID}&part=snippet&part=replies")# add replies
+data=json.loads(response.text)
+#print(data)
+print()
+comments=[]
+while True:    
+   
+    for item in data["items"]:
+        Kinnds=item["snippet"]["topLevelComment"]["kind"]
+        Etags=item["snippet"]["topLevelComment"]["etag"]
+        id=item["snippet"]["topLevelComment"]["id"]
+        author=item["snippet"]["topLevelComment"]["snippet"]["authorDisplayName"]
+        authorChannelUrl=item["snippet"]["topLevelComment"]["snippet"]["authorChannelUrl"]
+        content=item["snippet"]["topLevelComment"]["snippet"]["textOriginal"]
+        published_at=item["snippet"]["topLevelComment"]["snippet"]["publishedAt"]
+       
+        comments.append((Kinnds,Etags, id,author,authorChannelUrl,content,published_at,authorChannelUrl,))
+      
+    if "nextPageToken" in data:
+        page_token=data["nextPageToken"]
+        response=requests.get(f"{URL}?key={API_KEY}&videoId={VIDEO_ID}&part=snippet&part=replies&pageToken={page_token}")
+        data=response.json()
+    else:
+        break
+#print(comments)
+
+import mysql.connector
+from mysql.connector import Error
+try:
+    # Ket noi toi MySQL
+    mydb = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="110202",
+        database="comments"
+    )
+    if mydb.is_connected():
+            db_Info = mydb.get_server_info()
+            print("Connected to MySQL Server version ", db_Info)
+            cursor = mydb.cursor()
+            cursor.execute("select database();")
+            record = cursor.fetchone()
+            print("You're connected to database: ", record)
+
+except Error as e:
+        print("Error while connecting to MySQL", e)
+finally:
+        if mydb.is_connected():
+            cursor.close()
+            mydb.close()
+            print("MySQL mydb is closed")
+'''
+
+'''
+import mysql.connector
+try:
+    connection = mysql.connector.connect( host="localhost",
+                                          user="root",
+                                          password="110202",
+                                          database="comments")
+    cursor = connection.cursor()
+    result = cursor.execute(mySql_Create_Table_Query)
+    print("Laptop Table created successfully ")
+
+except mysql.connector.Error as error:
+    print("Failed to create table in MySQL: {}".format(error))
+finally:
+    if connection.is_connected():
+        cursor.close()
+        connection.close()
+        print("MySQL connection is closed")
+'''
+import mysql.connector
+
+def insert_varibles_into_table(Kinnds,Etags,id,author,authorChannelUrl,content,published_at):
+    try:
+        connection = mysql.connector.connect( host="localhost",
+                                             user="root",
+                                             password="110202",
+                                             database="comments")
+        cursor = connection.cursor()
+        mySql_insert_query = """INSERT INTO comment_yt(Kinnds,Etags,id,author,authorChannelUrl,content,published_at) VALUES(%s,%s,%s,%s,%s,%s,%s)"""
+                                
+
+        record = (Kinnds,Etags,id,author,authorChannelUrl,content,published_at)
+        cursor.execute(mySql_insert_query, record)
+        connection.commit()
+        print("Record inserted successfully into comment_yt table")
+
+    except mysql.connector.Error as error:
+        print("Failed to insert into MySQL table {}".format(error))
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("MySQL connection is closed")
+
+
+
+'''
+    # Tao doi tuong con tro trong MySQL
+    mycursor = mydb.cursor()
+    # Tao cau truy van
+    #sql = "INSERT INTO yt(HoTen, Tuoi, GioiTinh) VALUES (%s, %s,%s)"
+    sql="INSERT INTO yt(Kinds,Etags,id,author,authorChannelUrl,content,published_at) VALUES(%s,%s,%s,%s,%s,%s,%s)"
+    #cursor.executemany(sql,comments)
+    # Them cac gia tri tuong ung vao cot
+    # Thuc thi cau truy van them ban ghi vao bang "tbl_user" bang ham executemany()
+    varr=('youtube#comment', 'O7obk4RgGXPokkuCXGhIURRSJJI', 'Ugi1PP2dW44ELHgCoAEC', 'Николай', 'http://www.youtube.com/channel/UC454PYEpMR-fr5OtXFw-BYQ', 'зверский голос', '2013-12-13T12:18:28Z', 'http://www.youtube.com/channel/UC454PYEpMR-fr5OtXFw-BYQ')
+    mycursor.execute(sql,varr)
+    # Xac thuc viec nhap ban ghi vao bang "tbl_user"
+    mydb.commit()
+    print(mycursor.rowcount, "ban ghi da duoc them vao bang!")
+except:# Truong hop co loi khi them ban ghi vao bang
+    print("Them ban ghi khong thanh cong!")
+'''
