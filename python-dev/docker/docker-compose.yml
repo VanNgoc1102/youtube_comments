@@ -1,0 +1,40 @@
+version: '3.1'
+
+services:
+  #mysql
+  mysql-dev:
+    image: mysql:8.0.29
+    hostname: mysql
+    restart: always
+    
+    environment:
+      MYSQL_ROOT_PASSWORD: 110202
+      MYSQL_DATABASE: comments
+    ports:
+      - "3310:3306"
+    networks:
+      - my-network
+  python_container:
+    image: python:3.8.13-bullseye
+    command: python3
+    volumes:
+      - ../:/src/
+    working_dir: /src
+    stdin_open: true
+    tty: true
+    depends_on:
+      - mysql-dev
+    links:
+      - 'mysql-dev'
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge
+
+
+
+
+
+  
