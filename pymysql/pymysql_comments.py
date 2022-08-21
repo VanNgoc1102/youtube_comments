@@ -1,4 +1,6 @@
 import json
+
+import requests
 import pymysql
 #create db 
 '''
@@ -32,22 +34,25 @@ mySql_Create_Table_Query ='''CREATE TABLE comment_yt(
 cursor.execute(mySql_Create_Table_Query)
 
 #get comment youtube
-import requests
-VIDEO_ID=input("Enter ID: ")
+def get_api():
+    with open('youtube_comments/api_file.json', 'r') as openfile:
+    # Reading from json file
+        json_object = json.load(openfile)
+        return json_object
+
+API_KEY = get_api().get('API_KEY')
+VIDEO_ID=input("VIDEO_ID : ")
 URL="https://www.googleapis.com/youtube/v3/commentThreads"
-API_KEY="AIzaSyBZnBVHK5L57k4cwbEVPN7GXMKHOlmnW3U"
 
-#VIDEO_ID=tlcWiP7OLFI&list=PLhBgTdAWkxeCL3bUv6NLGrg2248ryIUAD
-
+#VIDEO_ID="tlcWiP7OLFI&list=PLhBgTdAWkxeCL3bUv6NLGrg2248ryIUAD"
 
 response=requests.get(f"{URL}?key={API_KEY}&videoId={VIDEO_ID}&part=snippet&part=replies")# add replies
 data=json.loads(response.text)
-
 comments=[]
+
 while True:    
-   
     for item in data["items"]:
-        Kinnds=item["snippet"]["topLevelComment"]["kind"]
+        Kinds=item["snippet"]["topLevelComment"]["kind"]
         Etags=item["snippet"]["topLevelComment"]["etag"]
         id=item["snippet"]["topLevelComment"]["id"]
         author=item["snippet"]["topLevelComment"]["snippet"]["authorDisplayName"]
@@ -55,7 +60,18 @@ while True:
         content=item["snippet"]["topLevelComment"]["snippet"]["textOriginal"]
         published_at=item["snippet"]["topLevelComment"]["snippet"]["publishedAt"]
        
-        comments.append((Kinnds,Etags, id,author,authorChannelUrl,content,published_at,))
+        #comments.append((Kinds,Etags, id,author,authorChannelUrl,content,published_at,authorChannelUrl,))
+        comments.append({
+        "Kinds": Kinds,
+        "Etags": Etags, 
+        "id": id,
+        "author": author,  
+        "authorChannelUrl": authorChannelUrl,  
+        "content": content,  
+        "published_at":  published_at,  
+ #"replies": replies,  
+  })
+    
       
     if "nextPageToken" in data:
         page_token=data["nextPageToken"]
@@ -63,6 +79,7 @@ while True:
         data=response.json()
     else:
         break
+
 n=len(comments)
 #print(n)
 #rint(comments[1])
