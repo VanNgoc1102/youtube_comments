@@ -1,5 +1,5 @@
-
 import json
+
 with open("yt_comments.json","r") as f:
     data=json.load(f)
 n=len(data)
