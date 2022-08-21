@@ -1,7 +1,7 @@
 import json
-from socket import AI_ADDRCONFIG
 
 import requests
+
 def get_api():
     with open('youtube_comments/api_file.json', 'r') as openfile:
     # Reading from json file
@@ -9,7 +9,6 @@ def get_api():
         return json_object
 
 API_KEY = get_api().get('API_KEY')
-print(API_KEY)
 VIDEO_ID=input("VIDEO_ID : ")
 URL="https://www.googleapis.com/youtube/v3/commentThreads"
 
